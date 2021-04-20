@@ -7,16 +7,22 @@
 // TODO: remove these
 #include "world/light.h"
 
+#include "util/cfg.h"
+
 // global state
 struct State state;
 
 void init() {
+    struct CFG cfg = read_config();
+
     block_init();
     state.window = &window;
     renderer_init(&state.renderer);
     world_init(&state.world);
     ui_init(&state.ui);
     mouse_set_grabbed(true);
+
+    state.world.chunks_size = cfg.render_distance;
 
     struct Entity player = ecs_new(&state.world.ecs);
     ecs_add(player, C_POSITION);
@@ -47,7 +53,7 @@ void init() {
     ecs_add(player, C_LIGHT);
 
     struct ControlComponent *c_control = ecs_get(player, C_CONTROL);
-    c_control->mouse_sensitivity = 3.0f;
+    c_control->mouse_sensitivity = cfg.mouse_sensitivity;
 
     struct PositionComponent *c_position = ecs_get(player, C_POSITION);
     c_position->position = (vec3s) {{ 0, 80, 0 }};

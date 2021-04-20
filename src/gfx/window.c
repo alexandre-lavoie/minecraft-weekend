@@ -3,6 +3,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifdef EMSCRIPTEN
+#include <emscripten.h>
+#endif
+
 // global window
 struct Window window;
 
@@ -151,39 +155,47 @@ static void _render() {
     window.render();
 }
 
+void do_frame() {
+    const u64 now = NOW();
+
+    window.frame_delta = now - window.last_frame;
+    window.last_frame = now;
+
+    if (now - window.last_second > NS_PER_SECOND) {
+        window.fps = window.frames;
+        window.tps = window.ticks;
+        window.frames = 0;
+        window.ticks = 0;
+        window.last_second = now;
+
+        printf("FPS: %lld | TPS: %lld\n", window.fps, window.tps);
+    }
+
+    // tick processing
+    const u64 NS_PER_TICK = (NS_PER_SECOND / 60);
+    u64 tick_time = window.frame_delta + window.tick_remainder;
+    while (tick_time > NS_PER_TICK) {
+        _tick();
+        tick_time -= NS_PER_TICK;
+    }
+    window.tick_remainder = max(tick_time, 0);
+
+    _update();
+    _render();
+    glfwSwapBuffers(window.handle);
+    glfwPollEvents();
+}
+
 void window_loop() {
     _init();
 
-    while (!glfwWindowShouldClose(window.handle)) {
-        const u64 now = NOW();
-
-        window.frame_delta = now - window.last_frame;
-        window.last_frame = now;
-
-        if (now - window.last_second > NS_PER_SECOND) {
-            window.fps = window.frames;
-            window.tps = window.ticks;
-            window.frames = 0;
-            window.ticks = 0;
-            window.last_second = now;
-
-            printf("FPS: %lld | TPS: %lld\n", window.fps, window.tps);
-        }
-
-        // tick processing
-        const u64 NS_PER_TICK = (NS_PER_SECOND / 60);
-        u64 tick_time = window.frame_delta + window.tick_remainder;
-        while (tick_time > NS_PER_TICK) {
-            _tick();
-            tick_time -= NS_PER_TICK;
-        }
-        window.tick_remainder = max(tick_time, 0);
-    
-        _update();
-        _render();
-        glfwSwapBuffers(window.handle);
-        glfwPollEvents();
+    #ifdef EMSCRIPTEN
+    emscripten_set_main_loop(do_frame, 0, 1);
+    #else
+    while(!glfwWindowShouldClose(window.handle)) {
+        (*do_frame)();
     }
+    #endif
 
     _destroy();
     exit(0);

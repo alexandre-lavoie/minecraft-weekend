@@ -79,7 +79,9 @@ void renderer_prepare(struct Renderer *self, enum RenderPass pass) {
                 &self->ortho_camera, GLMS_VEC2_ZERO,
                 (vec2s) {{ state.window->size.x, state.window->size.y }});
             glClear(GL_DEPTH_BUFFER_BIT);
+            #ifndef EMSCRIPTEN
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            #endif
             glDisable(GL_DEPTH_TEST);
             glDisable(GL_CULL_FACE);
             glEnable(GL_BLEND);
@@ -90,7 +92,9 @@ void renderer_prepare(struct Renderer *self, enum RenderPass pass) {
                 self->clear_color.x, self->clear_color.y,
                 self->clear_color.z, self->clear_color.w);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            #ifndef EMSCRIPTEN
             glPolygonMode(GL_FRONT_AND_BACK, self->flags.wireframe ? GL_LINE : GL_FILL);
+            #endif
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_LESS);
             glEnable(GL_CULL_FACE);

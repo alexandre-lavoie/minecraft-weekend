@@ -1,7 +1,6 @@
 #ifndef WORLD_H
 #define WORLD_H
 
-#include "../entity/player.h"
 #include "../gfx/gfx.h"
 #include "../util/util.h"
 #include "../block/block.h"

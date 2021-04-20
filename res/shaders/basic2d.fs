@@ -1,4 +1,6 @@
-#version 330
+#version 300 es
+
+precision highp float;
 
 uniform sampler2D tex;
 uniform bool use_tex;

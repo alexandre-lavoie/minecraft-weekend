@@ -1,8 +1,5 @@
-bin/game
-
 *.icloud
 .DS_Store
-.vscode
 
 # Prerequisites
 *.d
@@ -56,3 +53,15 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# VS
+.vscode
+
+# CMake
+bin
+bin-web
+build
+build-web
+
+# Game
+game.cfg
